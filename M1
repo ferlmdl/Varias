@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Malla Interactiva - Ingeniería Civil Informática UDP</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2c3e50;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #3498db;
+    }
+
+    .progress-container {
+      margin: 20px auto;
+      width: 80%;
+      background-color: #ecf0f1;
+      border-radius: 10px;
+      height: 25px;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: 10px;
+      background-color: #2ecc71;
+      width: 0%;
+      transition: width 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 30px;
+      background: #3498db;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      flex-wrap: wrap;
+    }
+
+    .stat-box {
+      text-align: center;
+      margin: 5px;
+      min-width: 120px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .stat-label {
+      font-size: 14px;
+    }
+
+    .semestre {
+      margin-bottom: 30px;
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 5px solid #3498db;
+      transition: all 0.3s;
+    }
+
+    .semestre.completed-semestre {
+      background-color: #e8f5e9;
+      border-left-color: #2ecc71;
+      opacity: 0.9;
+    }
+
+    .semestre h2 {
+      background-color: #3498db;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      margin-top: 0;
+      font-size: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .semestre.completed-semestre h2 {
+      background-color: #2ecc71;
+    }
+
+    .semestre-header {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      align-items: center;
+    }
+
+    .semestre-title {
+      flex-grow: 1;
+    }
+
+    .semestre-actions {
+      display: flex;
+      align-items: center;
+    }
+
+    .semestre-completed {
+      font-weight: normal;
+      font-size: 14px;
+      margin-left: 10px;
+    }
+
+    .complete-semestre-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-left: 10px;
+      transition: all 0.3s;
+    }
+
+    .complete-semestre-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 10px;
+    }
+
+    li {
+      margin: 5px 0;
+      cursor: pointer;
+      padding: 10px 15px;
+      background-color: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 5px;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    li:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    li.completed {
+      text-decoration: line-through;
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      border-color: #c8e6c9;
+    }
+
+    .creditos {
+      margin-left: auto;
+      font-size: 12px;
+      color: #7f8c8d;
+      background: #ecf0f1;
+      padding: 3px 6px;
+      border-radius: 10px;
+    }
+
+    .completed .creditos {
+      background: #c8e6c9;
+      color: #2e7d32;
+    }
+
+    .search-container {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    #search {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 8px 15px;
+      background: #ecf0f1;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .filter-btn.active {
+      background: #3498db;
+      color: white;
+    }
+
+    .reset-btn {
+      background: #e74c3c;
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      ul {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .semestre-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .semestre-actions {
+        margin-top: 10px;
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Malla Interactiva - Ingeniería Civil Informática UDP</h1>
+    
+    <div class="progress-container">
+      <div id="progressBar" class="progress-bar">0% completado</div>
+    </div>
+    
+    <div class="stats">
+      <div class="stat-box">
+        <div class="stat-label">Ramos totales</div>
+        <div id="totalCourses" class="stat-value">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Aprobados</div>
+        <div id="completedCourses" class="stat-value">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Porcentaje</div>
+        <div id="percentage" class="stat-value">0%</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Créditos totales</div>
+        <div id="totalCreditos" class="stat-value">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Créditos aprobados</div>
+        <div id="completedCreditos" class="stat-value">0</div>
+      </div>
+    </div>
+    
+    <div class="search-container">
+      <input type="text" id="search" placeholder="Buscar ramo...">
+      <button id="clearSearch" class="filter-btn">Limpiar</button>
+    </div>
+    
+    <div class="filter-buttons">
+      <button id="filterAll" class="filter-btn active">Todos</button>
+      <button id="filterCompleted" class="filter-btn">Aprobados</button>
+      <button id="filterPending" class="filter-btn">Pendientes</button>
+      <button id="resetAll" class="filter-btn reset-btn">Reiniciar todo</button>
+    </div>
+    
+    <div id="malla"></div>
+  </div>
+
+  <script>
+    const malla = {
+      {
+  "Semestre 1": [
+    { "nombre": "Comunicación para la Ingeniería", "creditos": null },
+    { "nombre": "Cálculo I", "creditos": null },
+    { "nombre": "Química", "creditos": null },
+    { "nombre": "Programación", "creditos": null },
+    { "nombre": "Álgebra y Geometría", "creditos": null }
+  ],
+  "Semestre 2": [
+    { "nombre": "Inglés I", "creditos": null },
+    { "nombre": "Cálculo II", "creditos": null },
+    { "nombre": "Mecánica", "creditos": null },
+    { "nombre": "Programación Avanzada", "creditos": null },
+    { "nombre": "Álgebra Lineal", "creditos": null }
+  ],
+  "Semestre 3": [
+    { "nombre": "Inglés II", "creditos": null },
+    { "nombre": "Ecuaciones Diferenciales", "creditos": null },
+    { "nombre": "Optimización", "creditos": null },
+    { "nombre": "Contabilidad y Costos", "creditos": null },
+    { "nombre": "Estructura de Datos y Algoritmos", "creditos": null }
+  ],
+  "Semestre 4": [
+    { "nombre": "Inglés III", "creditos": null },
+    { "nombre": "Cálculo III", "creditos": null },
+    { "nombre": "Calor y Ondas", "creditos": null },
+    { "nombre": "Redes de Datos", "creditos": null },
+    { "nombre": "Electrónica y Electrotecnia", "creditos": null },
+    { "nombre": "Bases de Datos", "creditos": null }
+  ],
+  "Semestre 5": [
+    { "nombre": "Curso de Formación General", "creditos": null },
+    { "nombre": "Electricidad y Magnetismo", "creditos": null },
+    { "nombre": "Desarrollo Web y Móvil", "creditos": null },
+    { "nombre": "Taller de Redes y Servicios", "creditos": null },
+    { "nombre": "Proyecto en TICs I", "creditos": null }
+  ],
+  "Semestre 6": [
+    { "nombre": "Curso de Formación General", "creditos": null },
+    { "nombre": "Bases de Datos Avanzadas", "creditos": null },
+    { "nombre": "Gestión Organizacional", "creditos": null },
+    { "nombre": "Arquitectura y Organización de Computadores", "creditos": null },
+    { "nombre": "Señales y Sistemas", "creditos": null }
+  ],
+  "Semestre 7": [
+    { "nombre": "Curso de Formación General", "creditos": null },
+    { "nombre": "Sistemas Operativos", "creditos": null },
+    { "nombre": "Ingeniería de Software", "creditos": null },
+    { "nombre": "Inteligencia Artificial", "creditos": null },
+    { "nombre": "Evaluación de Proyectos TIC", "creditos": null }
+  ],
+  "Semestre 8": [
+    { "nombre": "Curso de Formación General", "creditos": null },
+    { "nombre": "Data Science", "creditos": null },
+    { "nombre": "Proyecto en TICs II", "creditos": null },
+    { "nombre": "Introducción a la Economía", "creditos": null },
+    { "nombre": "Electivo Profesional", "creditos": null }
+  ],
+  "Semestre 9": [
+    { "nombre": "Electivo Profesional", "creditos": null },
+    { "nombre": "Tecnologías Inalámbricas", "creditos": null },
+    { "nombre": "Criptografía y Seguridad en Redes", "creditos": null },
+    { "nombre": "Arquitecturas Emergentes", "creditos": null }
+  ],
+  "Semestre 10": [
+    { "nombre": "Electivo Profesional", "creditos": null },
+    { "nombre": "Electivo Profesional", "creditos": null },
+    { "nombre": "Electivo Profesional", "creditos": null },
+    { "nombre": "Arquitectura de Software", "creditos": null }
+  ],
+  "Semestre 11": [
+    { "nombre": "Práctica Profesional II", "creditos": null },
+    { "nombre": "Actividad de Titulación", "creditos": null }
+  ]
+}
+
+
+    const mallaDiv = document.getElementById("malla");
+    const progressBar = document.getElementById("progressBar");
+    const totalCoursesEl = document.getElementById("totalCourses");
+    const completedCoursesEl = document.getElementById("completedCourses");
+    const percentageEl = document.getElementById("percentage");
+    const totalCreditosEl = document.getElementById("totalCreditos");
+    const completedCreditosEl = document.getElementById("completedCreditos");
+    const searchInput = document.getElementById("search");
+    const clearSearchBtn = document.getElementById("clearSearch");
+    const filterAllBtn = document.getElementById("filterAll");
+    const filterCompletedBtn = document.getElementById("filterCompleted");
+    const filterPendingBtn = document.getElementById("filterPending");
+    const resetAllBtn = document.getElementById("resetAll");
+
+    let totalCourses = 0;
+    let completedCourses = 0;
+    let totalCreditos = 0;
+    let completedCreditos = 0;
+    let currentFilter = "all";
+    let currentSearch = "";
+
+    function renderMalla() {
+      mallaDiv.innerHTML = "";
+      totalCourses = 0;
+      completedCourses = 0;
+      totalCreditos = 0;
+      completedCreditos = 0;
+      
+      for (const [semestre, ramos] of Object.entries(malla)) {
+        const container = document.createElement("div");
+        container.classList.add("semestre");
+
+        const semestreCompleto = ramos.every(ramo => localStorage.getItem(ramo.nombre) === "1");
+        if (semestreCompleto) {
+          container.classList.add("completed-semestre");
+        }
+
+        const header = document.createElement("h2");
+        
+        const headerContent = document.createElement("div");
+        headerContent.classList.add("semestre-header");
+        
+        const title = document.createElement("div");
+        title.classList.add("semestre-title");
+        title.textContent = semestre;
+        
+        const actions = document.createElement("div");
+        actions.classList.add("semestre-actions");
+        
+        const semestreCompleted = ramos.filter(ramo => 
+          localStorage.getItem(ramo.nombre) === "1").length;
+        const semestreCreditos = ramos.reduce((sum, ramo) => sum + ramo.creditos, 0);
+        const semestreCreditosCompletados = ramos.reduce((sum, ramo) => 
+          sum + (localStorage.getItem(ramo.nombre) === "1" ? ramo.creditos : 0), 0);
+        
+        const completedSpan = document.createElement("span");
+        completedSpan.classList.add("semestre-completed");
+        completedSpan.textContent = `${semestreCompleted}/${ramos.length} ramos | ${semestreCreditosCompletados}/${semestreCreditos} créditos`;
+        
+        const completeBtn = document.createElement("button");
+        completeBtn.classList.add("complete-semestre-btn");
+        completeBtn.textContent = semestreCompleto ? "✓ Completo" : "Completar semestre";
+        completeBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          toggleCompleteSemestre(semestre, ramos, !semestreCompleto);
+        });
+        
+        actions.appendChild(completedSpan);
+        actions.appendChild(completeBtn);
+        
+        headerContent.appendChild(title);
+        headerContent.appendChild(actions);
+        header.appendChild(headerContent);
+        
+        header.addEventListener("click", () => {
+          container.classList.toggle("collapsed");
+        });
+
+        container.appendChild(header);
+
+        const list = document.createElement("ul");
+        
+        ramos.forEach(ramo => {
+          totalCourses++;
+          totalCreditos += ramo.creditos;
+
+          if (currentSearch && !ramo.nombre.toLowerCase().includes(currentSearch.toLowerCase())) {
+            return;
+          }
+          
+          const isCompleted = localStorage.getItem(ramo.nombre) === "1";
+          if (currentFilter === "completed" && !isCompleted) return;
+          if (currentFilter === "pending" && isCompleted) return;
+          
+          if (isCompleted) {
+            completedCourses++;
+            completedCreditos += ramo.creditos;
+          }
+
+          const item = document.createElement("li");
+          if (isCompleted) item.classList.add("completed");
+          
+          item.textContent = ramo.nombre;
+          
+          const creditosSpan = document.createElement("span");
+          creditosSpan.classList.add("creditos");
+          creditosSpan.textContent = `${ramo.creditos} créditos`;
+          item.appendChild(creditosSpan);
+          
+          item.addEventListener("click", () => {
+            item.classList.toggle("completed");
+            const wasCompleted = localStorage.getItem(ramo.nombre) === "1";
+            localStorage.setItem(ramo.nombre, item.classList.contains("completed") ? "1" : "0");
+
+            if (item.classList.contains("completed") && !wasCompleted) {
+              completedCreditos += ramo.creditos;
+            } else if (!item.classList.contains("completed") && wasCompleted) {
+              completedCreditos -= ramo.creditos;
+            }
+            
+            updateStats();
+            renderMalla();
+          });
+
+          list.appendChild(item);
+        });
+
+        container.appendChild(list);
+        mallaDiv.appendChild(container);
+      }
+      
+      updateStats();
+    }
+
+    function toggleCompleteSemestre(semestre, ramos, completar) {
+      ramos.forEach(ramo => {
+        localStorage.setItem(ramo.nombre, completar ? "1" : "0");
+      });
+      renderMalla();
+    }
+
+    function updateStats() {
+      const percentage = Math.round((completedCourses / totalCourses) * 100);
+      const creditosPercentage = Math.round((completedCreditos / totalCreditos) * 100);
+      
+      progressBar.style.width = `${percentage}%`;
+      progressBar.textContent = `${percentage}% completado (${completedCreditos}/${totalCreditos} créditos)`;
+      
+      totalCoursesEl.textContent = totalCourses;
+      completedCoursesEl.textContent = completedCourses;
+      percentageEl.textContent = `${percentage}%`;
+      totalCreditosEl.textContent = totalCreditos;
+      completedCreditosEl.textContent = completedCreditos;
+    }
+
+    searchInput.addEventListener("input", (e) => {
+      currentSearch = e.target.value;
+      renderMalla();
+    });
+
+    clearSearchBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      currentSearch = "";
+      renderMalla();
+    });
+
+    filterAllBtn.addEventListener("click", () => {
+      currentFilter = "all";
+      updateFilterButtons();
+      renderMalla();
+    });
+
+    filterCompletedBtn.addEventListener("click", () => {
+      currentFilter = "completed";
+      updateFilterButtons();
+      renderMalla();
+    });
+
+    filterPendingBtn.addEventListener("click", () => {
+      currentFilter = "pending";
+      updateFilterButtons();
+      renderMalla();
+    });
+
+    resetAllBtn.addEventListener("click", () => {
+      if (confirm("¿Estás seguro que quieres reiniciar todo el progreso?")) {
+        for (const ramos of Object.values(malla)) {
+          ramos.forEach(ramo => {
+            localStorage.removeItem(ramo.nombre);
+          });
+        }
+        renderMalla();
+      }
+    });
+
+    function updateFilterButtons() {
+      filterAllBtn.classList.toggle("active", currentFilter === "all");
+      filterCompletedBtn.classList.toggle("active", currentFilter === "completed");
+      filterPendingBtn.classList.toggle("active", currentFilter === "pending");
+    }
+
+    renderMalla();
+  </script>
+</body>
+</html>
