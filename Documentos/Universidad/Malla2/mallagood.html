@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Malla Curricular - Ingeniería Civil Informática UDP</title>
+  <style>
+    :root {
+      --general: #ffffff;    /* Azul celeste claro - Formación General */
+      --basicas: #d4d4d4;    /* Amarillo claro - Ciencias Básicas */
+      --ciencias-ing: #9fcacf; /* Rosado - Ciencias de la Ingeniería */
+      --info: #9fdbee;       /* Lila - Ingeniería Aplicada: Informática */
+      --telecom: #7f96c0;    /* Verde claro - Telecomunicaciones */
+      --proyectos: #83afd8;  /* Durazno - Proyectos e Integración */
+      --practicas: #cedabf;  /* Gris claro - Prácticas y Titulación */
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2c3e50;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #3498db;
+    }
+
+    .progress-container {
+      margin: 20px auto;
+      width: 80%;
+      background-color: #ecf0f1;
+      border-radius: 10px;
+      height: 25px;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: 10px;
+      background-color: #2ecc71;
+      width: 0%;
+      transition: width 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 30px;
+      background: #3498db;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      flex-wrap: wrap;
+    }
+
+    .stat-box {
+      text-align: center;
+      margin: 5px;
+      min-width: 120px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .stat-label {
+      font-size: 14px;
+    }
+
+    .malla-grid {
+      display: grid;
+      grid-template-columns: repeat(11, 1fr);
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    .semestre-col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 100px;
+      background-color: #f8f9fa;
+      padding: 10px;
+      border-radius: 5px;
+      border: 2px dashed transparent;
+      transition: all 0.3s;
+    }
+
+    .semestre-col.drag-over {
+      border-color: #3498db;
+      background-color: #e3f2fd;
+    }
+
+    .semestre-title {
+      background-color: #3498db;
+      color: white;
+      padding: 8px;
+      border-radius: 5px;
+      text-align: center;
+      font-weight: bold;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .ramo {
+      padding: 10px;
+      border-radius: 5px;
+      cursor: grab;
+      transition: all 0.3s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 14px;
+      position: relative;
+      user-select: none;
+    }
+
+    .ramo:active {
+      cursor: grabbing;
+    }
+
+    .ramo.dragging {
+      opacity: 0.5;
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .ramo:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .ramo.completed {
+      text-decoration: line-through;
+      opacity: 0.8;
+    }
+
+    .creditos {
+      position: absolute;
+      bottom: 3px;
+      right: 5px;
+      font-size: 10px;
+      background: rgba(0,0,0,0.1);
+      padding: 2px 5px;
+      border-radius: 10px;
+    }
+
+    /* Categorías de colores */
+    .general { background-color: var(--general); }
+    .basicas { background-color: var(--basicas); }
+    .ciencias-ing { background-color: var(--ciencias-ing); }
+    .info { background-color: var(--info); }
+    .telecom { background-color: var(--telecom); }
+    .proyectos { background-color: var(--proyectos); }
+    .practicas { background-color: var(--practicas); }
+
+    .leyenda {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .leyenda-item {
+      display: flex;
+      align-items: center;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .search-container {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    #search {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 8px 15px;
+      background: #ecf0f1;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .filter-btn.active {
+      background: #3498db;
+      color: white;
+    }
+
+    .reset-btn {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .save-btn {
+      background: #2ecc71;
+      color: white;
+    }
+
+    @media (max-width: 1200px) {
+      .malla-grid {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .malla-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .stats {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .ramo {
+        height: 60px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .malla-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Malla Curricular Interactiva - Ingeniería Civil en Informática y Telecomunicaciones</h1>
+    
+    <div class="progress-container">
+      <div id="progressBar" class="progress-bar">0% completado</div>
+    </div>
+    
+    <div class="stats">
+      <div class="stat-box">
+        <div class="stat-label">Ramos totales</div>
+        <div id="totalCourses" class="stat-value">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Aprobados</div>
+        <div id="completedCourses" class="stat-value">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Porcentaje</div>
+        <div id="percentage" class="stat-value">0%</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Créditos totales</div>
+        <div id="totalCreditos" class="stat-value">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Créditos aprobados</div>
+        <div id="completedCreditos" class="stat-value">0</div>
+      </div>
+    </div>
+    
+    <div class="search-container">
+      <input type="text" id="search" placeholder="Buscar ramo...">
+      <button id="clearSearch" class="filter-btn">Limpiar</button>
+    </div>
+    
+    <div class="filter-buttons">
+      <button id="filterAll" class="filter-btn active">Todos</button>
+      <button id="filterCompleted" class="filter-btn">Aprobados</button>
+      <button id="filterPending" class="filter-btn">Pendientes</button>
+      <button id="saveMalla" class="filter-btn save-btn">Guardar Cambios</button>
+      <button id="resetAll" class="filter-btn reset-btn">Reiniciar todo</button>
+    </div>
+    
+    <div class="malla-grid" id="mallaGrid"></div>
+    
+    <div class="leyenda">
+      <div class="leyenda-item general">Formación General e Inglés</div>
+      <div class="leyenda-item basicas">Ciencias Básicas</div>
+      <div class="leyenda-item ciencias-ing">Ciencias de la Ingeniería</div>
+      <div class="leyenda-item info">Ingeniería Aplicada: Informática</div>
+      <div class="leyenda-item telecom">Ingeniería Aplicada: Telecomunicaciones</div>
+      <div class="leyenda-item proyectos">Proyectos e Integración</div>
+      <div class="leyenda-item practicas">Prácticas y Titulación</div>
+    </div>
+  </div>
+
+  <script>
+    // Datos iniciales de la malla
+    const mallaOriginal = [
+      // Semestre 1
+      [
+        { nombre: "Álgebra y Geometría", creditos: 7, categoria: "basicas" },
+        { nombre: "Cálculo I", creditos: 7, categoria: "basicas" },
+        { nombre: "Química", creditos: 6, categoria: "basicas" },
+        { nombre: "Programación", creditos: 6, categoria: "ciencias-ing" },
+        { nombre: "Comunicación para la Ingeniería", creditos: 5, categoria: "general" }
+      ],
+      // Semestre 2
+      [
+        { nombre: "Álgebra Lineal", creditos: 6, categoria: "basicas" },
+        { nombre: "Cálculo II", creditos: 6, categoria: "basicas" },
+        { nombre: "Mecánica", creditos: 7, categoria: "basicas" },
+        { nombre: "Programación Avanzada", creditos: 6, categoria: "ciencias-ing" },
+        { nombre: "CFG", creditos: 5, categoria: "general" }
+      ],
+      // Semestre 3
+      [
+        { nombre: "Ecuaciones Diferenciales", creditos: 6, categoria: "basicas" },
+        { nombre: "Cálculo III", creditos: 6, categoria: "basicas" },
+        { nombre: "Calor y Ondas", creditos: 7, categoria: "basicas" },
+        { nombre: "Estructura de Datos y Algoritmos", creditos: 6, categoria: "info" },
+        { nombre: "Redes de Datos", creditos: 6, categoria: "telecom" }
+      ],
+      // Semestre 4
+      [
+        { nombre: "Probabilidades y Estadísticas", creditos: 6, categoria: "ciencias-ing" },
+        { nombre: "Electrónica y Electrotecnia", creditos: 6, categoria: "ciencias-ing" },
+        { nombre: "Electricidad y Magnetismo", creditos: 7, categoria: "basicas" },
+        { nombre: "Bases de Datos", creditos: 6, categoria: "info" },
+        { nombre: "Desarrollo Web y Móvil", creditos: 6, categoria: "info" },
+        { nombre: "Inglés I", creditos: 5, categoria: "general" }
+      ],
+      // Semestre 5
+      [
+        { nombre: "Optimización", creditos: 6, categoria: "general" },
+        { nombre: "Taller de Redes y Servicios", creditos: 6, categoria: "telecom" },
+        { nombre: "Proyecto en TICs I", creditos: 6, categoria: "proyectos" },
+        { nombre: "Bases de Datos Avanzadas", creditos: 6, categoria: "info" },
+        { nombre: "CFG", creditos: 5, categoria: "general" },
+        { nombre: "Inglés II", creditos: 5, categoria: "general" },
+        { nombre: "Práctica I", creditos: 7, categoria: "practicas" }
+      ],
+      // Semestre 6
+      [
+        { nombre: "Contabilidad y Costos", creditos: 6, categoria: "ciencias-ing" },
+        { nombre: "Arquitectura y Organización de Computadores", creditos: 6, categoria: "info" },
+        { nombre: "Señales y Sistemas", creditos: 6, categoria: "telecom" },
+        { nombre: "Sistemas Operativos", creditos: 6, categoria: "info" },
+        { nombre: "Curso de Formación General", creditos: 5, categoria: "general" },
+        { nombre: "Inglés III", creditos: 5, categoria: "general" }
+      ],
+      // Semestre 7
+      [
+        { nombre: "Gestión Organizacional", creditos: 6, categoria: "ciencias-ing" },
+        { nombre: "Sistemas Distribuidos", creditos: 6, categoria: "info" },
+        { nombre: "Comunicaciones Digitales", creditos: 6, categoria: "telecom" },
+        { nombre: "Ingeniería de Software", creditos: 6, categoria: "info" },
+        { nombre: "CFG", creditos: 5, categoria: "general" }
+      ],
+      // Semestre 8
+      [
+        { nombre: "Introducción a la Economía", creditos: 6, categoria: "ciencias-ing" },
+        { nombre: "Tecnologías Inalámbricas", creditos: 6, categoria: "telecom" },
+        { nombre: "Criptografía y Seguridad en Redes", creditos: 6, categoria: "telecom" },
+        { nombre: "Inteligencia Artificial", creditos: 6, categoria: "info" },
+        { nombre: "Evaluación de Proyectos TIC", creditos: 6, categoria: "proyectos" },
+        { nombre: "Práctica Profesional II", creditos: 7, categoria: "practicas" }
+      ],
+      // Semestre 9
+      [
+        { nombre: "Electivo Profesional", creditos: 6, categoria: "info" },
+        { nombre: "Arquitecturas Emergentes", creditos: 6, categoria: "telecom" },
+        { nombre: "Electivo Profesional", creditos: 6, categoria: "telecom" },
+        { nombre: "Arquitectura de Software", creditos: 6, categoria: "info" },
+        { nombre: "Data Science", creditos: 6, categoria: "proyectos" }
+      ],
+      // Semestre 10
+      [
+        { nombre: "Electivo Profesional", creditos: 6, categoria: "info" },
+        { nombre: "Electivo Profesional", creditos: 6, categoria: "telecom" },
+        { nombre: "Electivo Profesional", creditos: 6, categoria: "telecom" },
+        { nombre: "Electivo Profesional", creditos: 6, categoria: "info" },
+        { nombre: "Proyecto en TICs II", creditos: 6, categoria: "proyectos" }
+      ],
+      // Semestre 11
+      [
+        { nombre: "Actividad de Titulación", creditos: 0, categoria: "practicas" }
+      ]
+    ];
+
+    // Variables globales
+    let malla = JSON.parse(JSON.stringify(mallaOriginal)); // Copia profunda inicial
+    let mallaPersonalizada = JSON.parse(localStorage.getItem('mallaPersonalizada')) || null;
+    
+    if (mallaPersonalizada) {
+      malla = mallaPersonalizada;
+    }
+
+    const mallaGrid = document.getElementById("mallaGrid");
+    const progressBar = document.getElementById("progressBar");
+    const totalCoursesEl = document.getElementById("totalCourses");
+    const completedCoursesEl = document.getElementById("completedCourses");
+    const percentageEl = document.getElementById("percentage");
+    const totalCreditosEl = document.getElementById("totalCreditos");
+    const completedCreditosEl = document.getElementById("completedCreditos");
+    const searchInput = document.getElementById("search");
+    const clearSearchBtn = document.getElementById("clearSearch");
+    const filterAllBtn = document.getElementById("filterAll");
+    const filterCompletedBtn = document.getElementById("filterCompleted");
+    const filterPendingBtn = document.getElementById("filterPending");
+    const resetAllBtn = document.getElementById("resetAll");
+    const saveMallaBtn = document.getElementById("saveMalla");
+
+    let totalCourses = 0;
+    let completedCourses = 0;
+    let totalCreditos = 0;
+    let completedCreditos = 0;
+    let currentFilter = "all";
+    let currentSearch = "";
+    let draggedItem = null;
+
+    // Función para renderizar la malla
+    function renderMalla() {
+      mallaGrid.innerHTML = "";
+      totalCourses = 0;
+      completedCourses = 0;
+      totalCreditos = 0;
+      completedCreditos = 0;
+      
+      malla.forEach((semestre, semestreIndex) => {
+        const semestreCol = document.createElement("div");
+        semestreCol.classList.add("semestre-col");
+        semestreCol.dataset.semestre = semestreIndex;
+        
+        // Hacer la columna un destino de arrastre
+        semestreCol.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          semestreCol.classList.add('drag-over');
+        });
+        
+        semestreCol.addEventListener('dragleave', () => {
+          semestreCol.classList.remove('drag-over');
+        });
+        
+        semestreCol.addEventListener('drop', (e) => {
+          e.preventDefault();
+          semestreCol.classList.remove('drag-over');
+          
+          if (draggedItem) {
+            const ramoData = JSON.parse(draggedItem.dataset.ramo);
+            const semestreOrigen = parseInt(draggedItem.dataset.semestre);
+            const semestreDestino = parseInt(semestreCol.dataset.semestre);
+            
+            if (semestreOrigen !== semestreDestino) {
+              // Mover el ramo al nuevo semestre
+              malla[semestreOrigen] = malla[semestreOrigen].filter(r => r.nombre !== ramoData.nombre);
+              malla[semestreDestino].push(ramoData);
+              
+              // Guardar el estado de aprobado
+              const isCompleted = localStorage.getItem(ramoData.nombre) === "1";
+              if (isCompleted) {
+                localStorage.setItem(ramoData.nombre, "1");
+              }
+              
+              renderMalla();
+            }
+          }
+        });
+        
+        const semestreTitle = document.createElement("div");
+        semestreTitle.classList.add("semestre-title");
+        semestreTitle.textContent = `S ${semestreIndex + 1}`;
+        semestreCol.appendChild(semestreTitle);
+        
+        semestre.forEach(ramo => {
+          totalCourses++;
+          totalCreditos += ramo.creditos;
+          
+          // Filtrado por búsqueda
+          if (currentSearch && !ramo.nombre.toLowerCase().includes(currentSearch.toLowerCase())) {
+            return;
+          }
+          
+          // Filtrado por estado
+          const isCompleted = localStorage.getItem(ramo.nombre) === "1";
+          if (currentFilter === "completed" && !isCompleted) return;
+          if (currentFilter === "pending" && isCompleted) return;
+          
+          if (isCompleted) {
+            completedCourses++;
+            completedCreditos += ramo.creditos;
+          }
+
+          const ramoElement = document.createElement("div");
+          ramoElement.classList.add("ramo", ramo.categoria);
+          if (isCompleted) ramoElement.classList.add("completed");
+          
+          ramoElement.textContent = ramo.nombre;
+          ramoElement.dataset.ramo = JSON.stringify(ramo);
+          ramoElement.dataset.semestre = semestreIndex;
+          ramoElement.draggable = true;
+          
+          // Configurar eventos de arrastre
+          ramoElement.addEventListener('dragstart', (e) => {
+            draggedItem = ramoElement;
+            ramoElement.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', ramo.nombre);
+            e.dataTransfer.effectAllowed = 'move';
+          });
+          
+          ramoElement.addEventListener('dragend', () => {
+            ramoElement.classList.remove('dragging');
+            draggedItem = null;
+          });
+          
+          const creditosSpan = document.createElement("span");
+          creditosSpan.classList.add("creditos");
+          creditosSpan.textContent = `${ramo.creditos}c`;
+          ramoElement.appendChild(creditosSpan);
+          
+          ramoElement.addEventListener("click", (e) => {
+            // Solo marcar/desmarcar si no estamos arrastrando
+            if (!draggedItem) {
+              ramoElement.classList.toggle("completed");
+              const wasCompleted = localStorage.getItem(ramo.nombre) === "1";
+              localStorage.setItem(ramo.nombre, ramoElement.classList.contains("completed") ? "1" : "0");
+              
+              // Actualizar contadores de créditos
+              if (ramoElement.classList.contains("completed") && !wasCompleted) {
+                completedCreditos += ramo.creditos;
+              } else if (!ramoElement.classList.contains("completed") && wasCompleted) {
+                completedCreditos -= ramo.creditos;
+              }
+              
+              updateStats();
+            }
+          });
+
+          semestreCol.appendChild(ramoElement);
+        });
+        
+        mallaGrid.appendChild(semestreCol);
+      });
+      
+      updateStats();
+    }
+
+    function updateStats() {
+      const percentage = Math.round((completedCourses / totalCourses) * 100);
+      const creditosPercentage = Math.round((completedCreditos / totalCreditos) * 100);
+      
+      progressBar.style.width = `${percentage}%`;
+      progressBar.textContent = `${percentage}% completado (${completedCreditos}/${totalCreditos} créditos)`;
+      
+      totalCoursesEl.textContent = totalCourses;
+      completedCoursesEl.textContent = completedCourses;
+      percentageEl.textContent = `${percentage}%`;
+      totalCreditosEl.textContent = totalCreditos;
+      completedCreditosEl.textContent = completedCreditos;
+    }
+
+    // Event listeners
+    searchInput.addEventListener("input", (e) => {
+      currentSearch = e.target.value;
+      renderMalla();
+    });
+
+    clearSearchBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      currentSearch = "";
+      renderMalla();
+    });
+
+    filterAllBtn.addEventListener("click", () => {
+      currentFilter = "all";
+      updateFilterButtons();
+      renderMalla();
+    });
+
+    filterCompletedBtn.addEventListener("click", () => {
+      currentFilter = "completed";
+      updateFilterButtons();
+      renderMalla();
+    });
+
+    filterPendingBtn.addEventListener("click", () => {
+      currentFilter = "pending";
+      updateFilterButtons();
+      renderMalla();
+    });
+
+    saveMallaBtn.addEventListener("click", () => {
+      localStorage.setItem('mallaPersonalizada', JSON.stringify(malla));
+      alert("¡Tu malla personalizada ha sido guardada!");
+    });
+
+    resetAllBtn.addEventListener("click", () => {
+      if (confirm("¿Estás seguro que quieres reiniciar toda la malla a su estado original?")) {
+        // Restaurar malla original
+        malla = JSON.parse(JSON.stringify(mallaOriginal));
+        localStorage.removeItem('mallaPersonalizada');
+        
+        // Limpiar estados de aprobación
+        malla.forEach(semestre => {
+          semestre.forEach(ramo => {
+            localStorage.removeItem(ramo.nombre);
+          });
+        });
+        
+        renderMalla();
+      }
+    });
+
+    function updateFilterButtons() {
+      filterAllBtn.classList.toggle("active", currentFilter === "all");
+      filterCompletedBtn.classList.toggle("active", currentFilter === "completed");
+      filterPendingBtn.classList.toggle("active", currentFilter === "pending");
+    }
+
+    // Inicializar
+    renderMalla();
+  </script>
+</body>
+</html>
